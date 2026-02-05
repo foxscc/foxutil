@@ -575,4 +575,3 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
-
