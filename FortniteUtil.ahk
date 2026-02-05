@@ -256,22 +256,26 @@ global HornHK  := Hotkey("$" . AirhornHotkey, StartAirhorn, "On")
 
 CheckForUpdates(Manual := false) {
     try {
-        ; Force cache bypass with timestamp
         whr := ComObject("WinHttp.WinHttpRequest.5.1")
         whr.Open("GET", VersionURL . "?t=" . A_TickCount, true)
         whr.Send()
         whr.WaitForResponse()
-        RemoteVersion := Trim(whr.ResponseText)
+        
+        ; Super-clean the remote text: Remove spaces, tabs, and newlines
+        RemoteVersion := RegExReplace(whr.ResponseText, "s)[^\d\.]", "") 
+        
+        ; Clean the local version just in case
+        LocalClean := RegExReplace(CurrentVersion, "s)[^\d\.]", "")
 
-        if (VerCompare(RemoteVersion, CurrentVersion) > 0) {
+        if (VerCompare(RemoteVersion, LocalClean) > 0) {
             if MsgBox("New version v" . RemoteVersion . " available. Download now?", "Update Found", "YesNo IconI") = "Yes"
                 PerformUpdate()
         } else if (Manual) {
-            MsgBox("Your script is up to date.`n`nVersion: v" . CurrentVersion, "Update Check", "IconI")
+            MsgBox("Up to date!`n`nLocal: " LocalClean "`nRemote: " RemoteVersion, "Success", "IconI")
         }
     } catch Error as e {
         if (Manual)
-            MsgBox("Update check failed.`n`nError: " . e.Message, "Connection Error", "IconX")
+            MsgBox("Update check failed: " . e.Message)
     }
 }
 
@@ -580,3 +584,4 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
+
