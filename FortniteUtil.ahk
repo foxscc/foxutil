@@ -8,7 +8,7 @@ ProcessSetPriority "High"
 CoordMode "Mouse", "Screen"
 
 ; --- VERSION & UPDATER CONFIG ---
-global CurrentVersion := "1.0.1" 
+global CurrentVersion := "1.0.2" 
 global VersionURL    := "https://raw.githubusercontent.com/foxscc/foxutil/main/version.txt"
 global DownloadURL   := "https://raw.githubusercontent.com/foxscc/foxutil/main/FortniteUtil.ahk"
 
@@ -284,14 +284,31 @@ PerformUpdate() {
     try {
         ; Bypass cache for actual download
         Download(DownloadURL . "?t=" . A_TickCount, tempFile)
+        
         batchPath := A_ScriptDir . "\updater.bat"
-        batchScript := "@echo off`ntimeout /t 1 /nobreak > nul`nmove /y `"" . tempFile . "`" `"" . A_ScriptFullPath . "`"`nstart `"" . A_ScriptFullPath . "`"`ndel `"%~f0`""
+        
+        ; Refined batch script:
+        ; 1. Wait 1 second (timeout)
+        ; 2. Move file (overwrite)
+        ; 3. Start the new script
+        ; 4. DEL the batch file itself
+        ; 5. EXIT the CMD window immediately
+        batchScript := 
+        (
+        "@echo off
+        timeout /t 1 /nobreak > nul
+        move /y `"" tempFile "`" `"" A_ScriptFullPath "`" > nul
+        start `"`" `"" A_ScriptFullPath "`"
+        (goto) 2>nul & del `"%~f0`" & exit"
+        )
         
         if FileExist(batchPath)
             FileDelete(batchPath)
+            
         FileAppend(batchScript, batchPath)
         
-        Run(batchPath, , "Hide")
+        ; Use "Hide" to prevent the window from even popping up in the first place
+        Run(batchPath, A_ScriptDir, "Hide")
         ExitApp()
     } catch Error as e {
         MsgBox("Download failed: " . e.Message)
@@ -584,5 +601,6 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
+
 
 
