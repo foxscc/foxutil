@@ -250,10 +250,17 @@ global HornHK  := Hotkey("$" . AirhornHotkey, StartAirhorn, "On")
 
 ; --- LOGIC ---
 
+To fix the loop once and for all, we’ll apply the "Cache Bypass" to both the version check and the actual download. This ensures that when you click "Yes," you are getting the absolute latest code you just uploaded, not the ghost of the version you uploaded ten minutes ago.
+
+Here is the updated logic. Replace the CheckForUpdates and PerformUpdate functions in your script with these:
+
+Updated Functions
+AutoHotkey
 CheckForUpdates(Manual := false) {
     try {
+        ; Bypass GitHub cache by adding a unique timestamp to the URL
         whr := ComObject("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", VersionURL, true)
+        whr.Open("GET", VersionURL . "?t=" . A_TickCount, true)
         whr.Send()
         whr.WaitForResponse()
         RemoteVersion := Trim(whr.ResponseText)
@@ -262,7 +269,6 @@ CheckForUpdates(Manual := false) {
             if MsgBox("New version v" . RemoteVersion . " available. Download now?", "Update Found", "YesNo IconI") = "Yes"
                 PerformUpdate()
         } else if (Manual) {
-            ; THIS IS THE FIX: Explicit notification when manually triggered
             MsgBox("Your script is up to date.`n`nVersion: v" . CurrentVersion, "Update Check", "IconI")
         }
     } catch Error as e {
@@ -274,9 +280,11 @@ CheckForUpdates(Manual := false) {
 PerformUpdate() {
     tempFile := A_ScriptDir . "\temp_update.ahk"
     try {
-        Download(DownloadURL, tempFile)
+        ; Also bypass cache for the download itself
+        Download(DownloadURL . "?t=" . A_TickCount, tempFile)
+        
         batchPath := A_ScriptDir . "\updater.bat"
-        batchScript := "@echo off`ntimeout /t 1 /nobreak > nul`nmove /y `"" . tempFile . "`" `"" . A_ScriptFullPath . "`"`nstart `"`" `"" . A_ScriptFullPath . "`"`ndel `"%~f0`""
+        batchScript := "@echo off`ntimeout /t 1 /nobreak > nul`nmove /y `"" . tempFile . "`" `"" . A_ScriptFullPath . "`"`nstart `"" . A_ScriptFullPath . "`"`ndel `"%~f0`""
         
         if FileExist(batchPath)
             FileDelete(batchPath)
@@ -575,4 +583,5 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
+
 
