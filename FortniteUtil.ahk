@@ -8,7 +8,7 @@ ProcessSetPriority "High"
 CoordMode "Mouse", "Screen"
 
 ; --- VERSION & UPDATER CONFIG ---
-global CurrentVersion := "1.0.0" 
+global CurrentVersion := "1.0.1" 
 global VersionURL    := "https://raw.githubusercontent.com/foxscc/foxutil/main/version.txt"
 global DownloadURL   := "https://raw.githubusercontent.com/foxscc/foxutil/main/FortniteUtil.ahk"
 
@@ -584,4 +584,5 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
+
 
