@@ -1,4 +1,4 @@
-﻿#Requires AutoHotkey v2.0
+#Requires AutoHotkey v2.0
 #SingleInstance Force
 
 ; --- INITIAL PERFORMANCE ---
@@ -8,11 +8,9 @@ ProcessSetPriority "High"
 CoordMode "Mouse", "Screen"
 
 ; --- VERSION & UPDATER CONFIG ---
-global CurrentVersion := "1.0.0"
-global GithubUser    := "foxscc"
-global GithubRepo    := "foxutil"
-global VersionURL    := "https://raw.githubusercontent.com/" GithubUser "/" GithubRepo "/main/version.txt"
-global DownloadURL   := "https://raw.githubusercontent.com/" GithubUser "/" GithubRepo "/main/FortniteUtil.ahk"
+global CurrentVersion := "1.0.0" 
+global VersionURL    := "https://raw.githubusercontent.com/foxscc/foxutil/main/version.txt"
+global DownloadURL   := "https://raw.githubusercontent.com/foxscc/foxutil/main/FortniteUtil.ahk"
 
 ; --- MESSAGE HANDLERS ---
 OnMessage(0x0201, WM_LBUTTONDOWN) 
@@ -23,14 +21,14 @@ if !A_IsAdmin {
     ExitApp()
 }
 
-; --- DATA PERSISTENCE --- [cite: 3]
+; --- DATA PERSISTENCE ---
 LocalAppData := EnvGet("LocalAppData")
 IniDir := LocalAppData "\FoxMacros\Combined"
 if !DirExist(IniDir)
     DirCreate(IniDir)
 IniFile := IniDir "\settings.ini"
 
-; --- SETTINGS LOADING --- [cite: 4]
+; --- SETTINGS LOADING ---
 global SavedDelay := Number(IniRead(IniFile, "Settings", "Delay", "10"))
 global SavedRes := IniRead(IniFile, "Settings", "Resolution", "1080p")
 global SavedTheme := IniRead(IniFile, "Settings", "Theme", "Electric Cyan")
@@ -46,7 +44,7 @@ global GamePath := IniRead(IniFile, "Settings", "GamePath", "")
 global AFKEnabled := false, g_TargetX := 0, g_TargetY := 0, g_ActiveName := "IDLE"
 global LastHoveredHwnd := 0, HoverMap := Map()
 
-; --- DATA PRESETS --- [cite: 5]
+; --- DATA PRESETS ---
 Themes := Map(
     "Electric Cyan", "00FFFF", "Emerald Venom", "00FF44", "Crimson Fury", "FF4444", 
     "Gold Rush", "FFCC00", "Purple Haze", "CC00FF", "Frost Bite", "AADDFF", 
@@ -62,7 +60,7 @@ Presets := Map(
 
 global CurrentGadgets := Presets[SavedRes]
 
-; --- GUI CONSTRUCTION --- [cite: 6]
+; --- GUI CONSTRUCTION ---
 T_Col := Themes[SavedTheme]
 MainGui := Gui("-Caption +Border")
 if AlwaysOnTop
@@ -88,7 +86,7 @@ MainGui.SetFont("s11 w400", "Segoe UI Symbol")
 MainGui.Add("Text", "x530 y15 w30 h30 Center c888888", "—").OnEvent("Click", (*) => MainGui.Minimize())
 MainGui.Add("Text", "x565 y15 w30 h30 Center cFF4444", "✕").OnEvent("Click", (*) => ExitApp())
 
-; --- SIDEBAR --- [cite: 8]
+; --- SIDEBAR ---
 MainGui.SetFont("s8 w800")
 SideTitle := MainGui.Add("Text", "x25 y125 c" T_Col " Background121212", "GADGET"), ThemeablePrimary.Push(SideTitle)
 MainGui.SetFont("s10 w700")
@@ -106,7 +104,7 @@ global AFKBtnTxt := MainGui.Add("Text", "x27 y442 w136 h38 Center +0x200 cFFFFFF
 AFKBtnTxt.OnEvent("Click", (ctrl, *) => ToggleAFK(ctrl))
 HoverMap[AFKBtnTxt.Hwnd] := AFKBtnTxt
 
-; --- NAVIGATION --- [cite: 9]
+; --- NAVIGATION ---
 MainGui.SetFont("s9 w800")
 TabNames := ["GADGETS", "SETTINGS", "THEME", "SYSTEM"]
 Loop TabNames.Length {
@@ -120,7 +118,7 @@ Loop TabNames.Length {
 }
 TabDivider := MainGui.Add("Text", "x177 y152 w435 h2 Background" T_Col), ThemeOutlines.Push(TabDivider)
 
-; --- TAB 1: GADGETS --- [cite: 10]
+; --- TAB 1: GADGETS ---
 MainGui.SetFont("s9 w700")
 Loop 9 {
     Idx := A_Index, Info := CurrentGadgets[Idx], row := Floor((Idx-1)/3), col := Mod(Idx-1,3), bx := 208+(col*126), by := 185+(row*85)
@@ -131,7 +129,7 @@ Loop 9 {
     TabContents[1].Push(gLabel)
 }
 
-; --- TAB 2: SETTINGS --- [cite: 11]
+; --- TAB 2: SETTINGS ---
 MainGui.SetFont("s8 w800")
 SubTabNames := ["GADGETS", "AIRHORN", "AFK"], SubTabModes := ["Gadget", "Horn", "AFK"]
 Loop SubTabNames.Length {
@@ -144,7 +142,7 @@ Loop SubTabNames.Length {
 }
 sLine := MainGui.Add("Text", "x200 y210 w385 h2 Background" T_Col), ThemeOutlines.Push(sLine), TabContents[2].Push(sLine)
 
-; --- TAB 3: THEME --- [cite: 12]
+; --- TAB 3: THEME ---
 MainGui.SetFont("s8 w400")
 t5 := MainGui.Add("Text", "x210 y180 cFFFFFF", "SELECT ACCENT COLOR"), TabContents[3].Push(t5)
 ThemeList := ["Electric Cyan", "Emerald Venom", "Crimson Fury", "Gold Rush", "Purple Haze", "Frost Bite", "Hazard Orange", "Ghost White", "Midnight Blue", "Hot Pink", "Deep Sea", "Custom"]
@@ -162,7 +160,7 @@ HoverToggle := MainGui.Add("Checkbox", "x210 y420 cFFFFFF Checked" (HoverEnabled
 HoverToggle.OnEvent("Click", OnHoverToggle)
 TabContents[3].Push(HoverToggle)
 
-; --- TAB 4: SYSTEM --- [cite: 14]
+; --- TAB 4: SYSTEM ---
 MainGui.SetFont("s9 w700")
 Sys1Bg := MainGui.Add("Text", "x210 y180 w175 h45 Background" T_Col), ThemeOutlines.Push(Sys1Bg)
 Sys1Tx := MainGui.Add("Text", "x212 y182 w171 h41 Center +0x200 cFFFFFF Background181818", "🚀 LAUNCH GAME")
@@ -184,7 +182,6 @@ Sys4Tx := MainGui.Add("Text", "x212 y292 w171 h41 Center +0x200 cFFFFFF Backgrou
 Sys4Tx.OnEvent("Click", (*) => FactoryReset())
 HoverMap[Sys4Tx.Hwnd] := Sys4Tx
 
-; --- NEW: UPDATE BUTTON ---
 Sys5Bg := MainGui.Add("Text", "x400 y290 w175 h45 Background" T_Col), ThemeOutlines.Push(Sys5Bg)
 Sys5Tx := MainGui.Add("Text", "x402 y292 w171 h41 Center +0x200 cFFFFFF Background181818", "🔄 UPDATE")
 Sys5Tx.OnEvent("Click", (*) => CheckForUpdates(true))
@@ -192,7 +189,7 @@ HoverMap[Sys5Tx.Hwnd] := Sys5Tx
 
 TabContents[4].Push(Sys1Bg, Sys1Tx, Sys2Bg, Sys2Tx, Sys3Bg, Sys3Tx, Sys4Bg, Sys4Tx, Sys5Bg, Sys5Tx)
 
-; --- SETTINGS GROUPS --- [cite: 16]
+; --- SETTINGS GROUPS ---
 MainGui.SetFont("s8 w400")
 global SettingGroups := Map()
 SettingGroups["Gadget"] := []
@@ -244,10 +241,10 @@ for tab_idx, tab_items in TabContents {
 }
 
 SwitchMainTab(1)
-CheckForUpdates(false) ; Check for updates silently on launch
+CheckForUpdates(false)
 MainGui.Show("w615 h515")
 
-; --- DYNAMIC HOTKEY INIT --- [cite: 19]
+; --- DYNAMIC HOTKEY INIT ---
 global MacroHK := Hotkey("~" . SavedHotkey, SpamLogic, "On")
 global HornHK  := Hotkey("$" . AirhornHotkey, StartAirhorn, "On")
 
@@ -261,12 +258,16 @@ CheckForUpdates(Manual := false) {
         whr.WaitForResponse()
         RemoteVersion := Trim(whr.ResponseText)
 
-        if (RemoteVersion > CurrentVersion) {
-            if MsgBox("New version v" . RemoteVersion . " available. Download now?", "Update", "YesNo IconI") = "Yes"
+        if (VerCompare(RemoteVersion, CurrentVersion) > 0) {
+            if MsgBox("New version v" . RemoteVersion . " available. Download now?", "Update Found", "YesNo IconI") = "Yes"
                 PerformUpdate()
         } else if (Manual) {
-            MsgBox("You are up to date.", "Update", "IconI")
+            ; THIS IS THE FIX: Explicit notification when manually triggered
+            MsgBox("Your script is up to date.`n`nVersion: v" . CurrentVersion, "Update Check", "IconI")
         }
+    } catch Error as e {
+        if (Manual)
+            MsgBox("Update check failed.`n`nError: " . e.Message, "Connection Error", "IconX")
     }
 }
 
@@ -284,7 +285,7 @@ PerformUpdate() {
         Run(batchPath, , "Hide")
         ExitApp()
     } catch Error as e {
-        MsgBox("Update failed: " . e.Message)
+        MsgBox("Download failed: " . e.Message)
     }
 }
 
@@ -318,7 +319,7 @@ HoverEffect(Ctrl, isEntering) {
          Ctrl.Opt("Background252525") 
         Ctrl.Opt("c" T_Col)           
     } else {
-        if (Ctrl.Hwnd = Sys1Tx.Hwnd || Ctrl.Hwnd = Sys2Tx.Hwnd || Ctrl.Hwnd = Sys3Tx.Hwnd || Ctrl.Hwnd = Sys4Tx.Hwnd || Ctrl.Hwnd = Sys5Tx.Hwnd)
+        if (Ctrl.Hwnd = Sys1Tx.Hwnd || Ctrl.Hwnd = Sys2Tx.Hwnd || Ctrl.Hwnd = Sys3Tx.Hwnd || Ctrl.Hwnd = Sys4Tx.Hwnd || (IsSet(Sys5Tx) && Ctrl.Hwnd = Sys5Tx.Hwnd))
              Ctrl.Opt("Background181818")
         else if (Ctrl.Hwnd = AFKBtnTxt.Hwnd)
              Ctrl.Opt("Background121212")
