@@ -8,7 +8,7 @@ ProcessSetPriority "High"
 CoordMode "Mouse", "Screen"
 
 ; --- VERSION & UPDATER CONFIG ---
-global CurrentVersion := "1.0.2" 
+global CurrentVersion := "1.0.3" 
 global VersionURL    := "https://raw.githubusercontent.com/foxscc/foxutil/main/version.txt"
 global DownloadURL   := "https://raw.githubusercontent.com/foxscc/foxutil/main/FortniteUtil.ahk"
 
@@ -280,26 +280,20 @@ CheckForUpdates(Manual := false) {
 }
 
 PerformUpdate() {
-    tempFile := A_ScriptDir . "\temp_update.ahk"
+    tempFile := A_ScriptDir . "\temp_update.ahk" ; Change to .exe if you converted
     try {
-        ; Bypass cache for actual download
         Download(DownloadURL . "?t=" . A_TickCount, tempFile)
         
         batchPath := A_ScriptDir . "\updater.bat"
         
-        ; Refined batch script:
-        ; 1. Wait 1 second (timeout)
-        ; 2. Move file (overwrite)
-        ; 3. Start the new script
-        ; 4. DEL the batch file itself
-        ; 5. EXIT the CMD window immediately
+        ; This version of the batch script is designed to kill itself instantly
         batchScript := 
         (
         "@echo off
         timeout /t 1 /nobreak > nul
         move /y `"" tempFile "`" `"" A_ScriptFullPath "`" > nul
-        start `"`" `"" A_ScriptFullPath "`"
-        (goto) 2>nul & del `"%~f0`" & exit"
+        start /b `"`" `"" A_ScriptFullPath "`"
+        powershell -Command `"Start-Sleep -m 100; Remove-Item '%~f0' -Force`" & exit"
         )
         
         if FileExist(batchPath)
@@ -307,7 +301,7 @@ PerformUpdate() {
             
         FileAppend(batchScript, batchPath)
         
-        ; Use "Hide" to prevent the window from even popping up in the first place
+        ; Run with Hide flag (6) to ensure the window never even flashes
         Run(batchPath, A_ScriptDir, "Hide")
         ExitApp()
     } catch Error as e {
@@ -601,6 +595,7 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
+
 
 
 
