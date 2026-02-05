@@ -189,6 +189,10 @@ HoverMap[Sys5Tx.Hwnd] := Sys5Tx
 
 TabContents[4].Push(Sys1Bg, Sys1Tx, Sys2Bg, Sys2Tx, Sys3Bg, Sys3Tx, Sys4Bg, Sys4Tx, Sys5Bg, Sys5Tx)
 
+; --- FOOTER ---
+MainGui.SetFont("s7 w400")
+VersionLabel := MainGui.Add("Text", "x540 y495 w70 Right c444444", "v" . CurrentVersion)
+
 ; --- SETTINGS GROUPS ---
 MainGui.SetFont("s8 w400")
 global SettingGroups := Map()
@@ -250,15 +254,9 @@ global HornHK  := Hotkey("$" . AirhornHotkey, StartAirhorn, "On")
 
 ; --- LOGIC ---
 
-To fix the loop once and for all, we’ll apply the "Cache Bypass" to both the version check and the actual download. This ensures that when you click "Yes," you are getting the absolute latest code you just uploaded, not the ghost of the version you uploaded ten minutes ago.
-
-Here is the updated logic. Replace the CheckForUpdates and PerformUpdate functions in your script with these:
-
-Updated Functions
-AutoHotkey
 CheckForUpdates(Manual := false) {
     try {
-        ; Bypass GitHub cache by adding a unique timestamp to the URL
+        ; Force cache bypass with timestamp
         whr := ComObject("WinHttp.WinHttpRequest.5.1")
         whr.Open("GET", VersionURL . "?t=" . A_TickCount, true)
         whr.Send()
@@ -280,9 +278,8 @@ CheckForUpdates(Manual := false) {
 PerformUpdate() {
     tempFile := A_ScriptDir . "\temp_update.ahk"
     try {
-        ; Also bypass cache for the download itself
+        ; Bypass cache for actual download
         Download(DownloadURL . "?t=" . A_TickCount, tempFile)
-        
         batchPath := A_ScriptDir . "\updater.bat"
         batchScript := "@echo off`ntimeout /t 1 /nobreak > nul`nmove /y `"" . tempFile . "`" `"" . A_ScriptFullPath . "`"`nstart `"" . A_ScriptFullPath . "`"`ndel `"%~f0`""
         
@@ -583,5 +580,3 @@ F2::Reload()
     for b in GadgetBorders
         b.Visible := false
 }
-
-
